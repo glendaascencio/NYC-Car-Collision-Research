@@ -21,7 +21,7 @@ library(rbokeh)
 library(scales)
 
 ##  Loading data
-setwd("~/Github/Car_Collisions_Research")
+setwd("~/Car_Collisions_Research")
 load("car_collisions.RData")
 ```
 
@@ -29,7 +29,6 @@ load("car_collisions.RData")
 
 ##### Season with highest car collision
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-summary(car_collision$season)
 seasons <- car_collision %>%
   group_by(season) %>%
   summarize(season_sum=n())
@@ -49,8 +48,6 @@ plot_ly(seasons, x = ~season, y = ~season_sum, color = ~season, text = ~paste("p
 
 ##### Later, we wanted to investigate in what borough we had the highest number of car collisions and our results show that Brooklyn is the most unsafe borough that has the major number of car collisions
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-summary(car_collision$borough)
-
 boroughs <- car_collision %>%
   group_by(borough) %>%
   summarize(borough_sum=n())
@@ -59,7 +56,8 @@ boroughs <- arrange(boroughs, desc(borough_sum))
 boroughs <- boroughs[2:6,]
 
 boroughs$borough <- factor(boroughs$borough, 
-                   levels=c("BROOKLYN", "MANHATTAN", "QUEENS", "BRONX", "STATEN ISLAND"),
+                   levels=c("BROOKLYN", "MANHATTAN", "QUEENS", "BRONX", 
+                            "STATEN ISLAND"),
                    ordered=TRUE)
 
 plot_ly(boroughs, x = ~borough, y = ~borough_sum, color = ~borough, text = ~paste("accidents: ", borough_sum)) %>%
@@ -72,8 +70,7 @@ plot_ly(boroughs, x = ~borough, y = ~borough_sum, color = ~borough, text = ~past
 
 ##### Investigating the day of the week is also an essential task we have to do know so we can educate our family about the day of the week that is the safest to travel
 
-```{r}
-
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 car_collision <- mutate(car_collision, day_w = strftime(car_collision$date_time, format = "%A"))
 
 #plot how many total accidents there are by day
@@ -199,7 +196,7 @@ ggplot(injured, aes(x = year_month, y = t_p_injured, color = as.factor(borough))
 injured1 <- car_collision %>%
   group_by(borough, total_people_injured)%>%
   summarize(t_inj=n())
-injured1 <- filter(injured1, total_people_injured != "0" & borough != "")
+# injured1 <- filter(injured1, borough != "")
 injured1 <- arrange(injured1, desc(t_inj))
 
 figure(width = NULL, height = NULL, 
@@ -213,7 +210,7 @@ figure(width = NULL, height = NULL,
 ```
 
 
-##### In NYC we also have a plethora of motorist who like to travel anywhere in NYC. However, it would be good to informed them about the most perilous boroughs, year and months where more motorist accidents have happened the most so they could be travel more cautiously
+##### In NYC we also have a plethora of motorist who like to travel anywhere in NYC. There were 517 motirist accidents in NYC and there were 180 accidents where the motorist was killed. That's why it would be good to informed citizens about the most perilous boroughs, year and months where more motorist accidents have happened the most so they could be travel more cautiously
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
   # a) Calculations
 motorist_accidents <- car_collision %>% 
@@ -250,6 +247,11 @@ ggplot(motorist_killed, aes(x = year_month, y = n_motorist_killed, color = as.fa
 m_k <- motorist_killed %>%
   group_by(season) %>%
   summarise(total=n())
+
+m_k <- arrange(m_k, desc(total))
+m_k$season <- factor(m_k$season, 
+                     levels=c("SUMMER", "FALL", "SPRING", "WINTER"),
+                     ordered = TRUE)
 
 plot_ly(m_k, x = ~season, y = ~total, color = ~season, text = ~paste("people_killed: ", total)) %>%
    layout(title = "Seasons Where Most Motorist Were Killed The Most",
